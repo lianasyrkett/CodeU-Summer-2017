@@ -39,6 +39,7 @@ import codeu.chat.util.Time;
 import codeu.chat.util.Timeline;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.Connection;
+import codeu.chat.common.ServerInfo;
 
 public final class Server {
 
@@ -63,6 +64,8 @@ public final class Server {
 
   private final Relay relay;
   private Uuid lastSeen = Uuid.NULL;
+
+  private static final ServerInfo info = new ServerInfo();
 
   public Server(final Uuid id, final Secret secret, final Relay relay) {
 
@@ -206,7 +209,10 @@ public final class Server {
           final int type = Serializers.INTEGER.read(connection.in());
           final Command command = commands.get(type);
 
-          if (command == null) {
+          if (type == NetworkCode.SERVER_INFO_REQUEST) {
+            Serializers.INTEGER.write(connection.out(), NetworkCode.SERVER_INFO_RESPONSE);
+            Uuid.SERIALIZER.write(connection.out(), info.version);
+          } else if (command == null) {
             // The message type cannot be handled so return a dummy message.
             Serializers.INTEGER.write(connection.out(), NetworkCode.NO_MESSAGE);
             LOG.info("Connection rejected");

@@ -22,6 +22,7 @@ import codeu.chat.common.BasicView;
 import codeu.chat.common.User;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.ConnectionSource;
+import codeu.chat.common.ServerInfo;
 
 public final class Context {
 
@@ -31,6 +32,10 @@ public final class Context {
   public Context(ConnectionSource source) {
     this.view = new View(source);
     this.controller = new Controller(source);
+  }
+
+  public ServerInfo getInfo() {
+    return view.getInfo();
   }
 
   public UserContext create(String name) {

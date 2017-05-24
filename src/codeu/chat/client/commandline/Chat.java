@@ -23,6 +23,7 @@ import codeu.chat.client.core.Context;
 import codeu.chat.client.core.ConversationContext;
 import codeu.chat.client.core.MessageContext;
 import codeu.chat.client.core.UserContext;
+import codeu.chat.common.ServerInfo;
 
 public final class Chat {
 
@@ -91,6 +92,18 @@ public final class Chat {
   private Panel createRootPanel(final Context context) {
 
     final Panel panel = new Panel();
+
+    panel.register("info", new Panel.Command() {
+      @Override
+      public void invoke(Scanner args) {
+        final ServerInfo info = context.getInfo();
+        if (info == null) {
+          System.out.println("ERROR: Failed to send a valid info object");
+        } else {
+          System.out.println(info);
+        }
+      }
+    });
 
     // HELP
     //
@@ -168,6 +181,7 @@ public final class Chat {
           System.out.println("ERROR: Missing <username>");
         }
       }
+
 
       // Find the first user with the given name and return a user context
       // for that user. If no user is found, the function will return null.
