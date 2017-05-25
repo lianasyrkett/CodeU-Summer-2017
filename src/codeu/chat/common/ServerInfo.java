@@ -7,8 +7,15 @@ public final class ServerInfo {
   private final static String SERVER_VERSION = "1.0.0";
 
   public final Uuid version;
+  private Uuid parseResult;
+
   public ServerInfo() {
-    this.version = Uuid.parse(SERVER_VERSION);
+    try {
+      parseResult = Uuid.parse(SERVER_VERSION);
+    } catch (IOException exception) {
+      exception.getMessage();
+    }
+    version = parseResult;
   }
 
   public ServerInfo(Uuid version) {
