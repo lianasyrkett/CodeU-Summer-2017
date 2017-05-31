@@ -1,5 +1,4 @@
-Summer-2017
-Ebou
+
 package codeu.chat.common;
 
 import codeu.chat.util.Uuid;
