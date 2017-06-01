@@ -7,7 +7,7 @@ public final class ServerInfo {
   private final static String SERVER_VERSION = "1.0.0";
 
   public final Uuid version;
-  private Uuid parseResult;
+  public Uuid parseResult;
 
   public ServerInfo() {
     try {

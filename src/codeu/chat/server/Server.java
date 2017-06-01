@@ -175,6 +175,14 @@ public final class Server {
       }
     });
 
+    this.commands.put(NetworkCode.SERVER_INFO_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        Serializers.INTEGER.write(out, NetworkCode.SERVER_INFO_RESPONSE);
+        Uuid.SERIALIZER.write(out, info.version);
+  }
+});
+
     this.timeline.scheduleNow(new Runnable() {
       @Override
       public void run() {
@@ -209,10 +217,7 @@ public final class Server {
           final int type = Serializers.INTEGER.read(connection.in());
           final Command command = commands.get(type);
 
-          if (type == NetworkCode.SERVER_INFO_REQUEST) {
-            Serializers.INTEGER.write(connection.out(), NetworkCode.SERVER_INFO_RESPONSE);
-            Uuid.SERIALIZER.write(connection.out(), info.version);
-          } else if (command == null) {
+          if (command == null) {
             // The message type cannot be handled so return a dummy message.
             Serializers.INTEGER.write(connection.out(), NetworkCode.NO_MESSAGE);
             LOG.info("Connection rejected");

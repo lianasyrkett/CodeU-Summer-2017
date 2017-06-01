@@ -49,11 +49,11 @@ final class View implements BasicView {
   public ServerInfo getInfo() {
     try (final Connection connection = this.source.connect()) {
       Serializers.INTEGER.write(connection.out(), NetworkCode.SERVER_INFO_REQUEST);
-      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.SERVER_INFO_RESPONSE) {
-      final Uuid version = Uuid.SERIALIZER.read(connection.in());
-      return new ServerInfo(version);
-      } else {
-        LOG.error("Response from server failed.");
+        if (Serializers.INTEGER.read(connection.in()) == NetworkCode.SERVER_INFO_RESPONSE) {
+          final Uuid version = Uuid.SERIALIZER.read(connection.in());
+          return new ServerInfo(version);
+        } else {
+            LOG.error("Response from server failed.");
       }
     } catch (Exception ex) {
       System.out.println("ERROR: Exception during call on server. Check log for details.");

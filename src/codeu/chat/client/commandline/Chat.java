@@ -93,18 +93,6 @@ public final class Chat {
 
     final Panel panel = new Panel();
 
-    panel.register("info", new Panel.Command() {
-      @Override
-      public void invoke(Scanner args) {
-        final ServerInfo info = context.getInfo();
-        if (info == null) {
-          System.out.println("ERROR: Failed to send a valid info object");
-        } else {
-          System.out.println(info);
-        }
-      }
-    });
-
     // HELP
     //
     // Add a command to print a list of all commands and their description when
@@ -114,16 +102,28 @@ public final class Chat {
       @Override
       public void invoke(Scanner args) {
         System.out.println("ROOT MODE");
+        System.out.println("  info");
+        System.out.println("    Version information about the server.");
         System.out.println("  u-list");
         System.out.println("    List all users.");
         System.out.println("  u-add <name>");
         System.out.println("    Add a new user with the given name.");
         System.out.println("  u-sign-in <name>");
         System.out.println("    Sign in as the user with the given name.");
-        System.out.println("  info");
-        System.out.println("    Version information about the server.");
         System.out.println("  exit");
         System.out.println("    Exit the program.");
+      }
+    });
+
+    panel.register("info", new Panel.Command() {
+      @Override
+      public void invoke(Scanner args) {
+        final ServerInfo info = context.getInfo();
+        if (info == null) {
+          System.out.println("ERROR: Failed to send a valid info object");
+        } else {
+          System.out.println(info);
+        }
       }
     });
 
@@ -183,7 +183,6 @@ public final class Chat {
           System.out.println("ERROR: Missing <username>");
         }
       }
-
 
       // Find the first user with the given name and return a user context
       // for that user. If no user is found, the function will return null.
