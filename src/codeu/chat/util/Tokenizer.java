@@ -7,6 +7,7 @@ public final class Tokenizer {
 	private int at;
 
 	public Tokenizer(String source) {
+		token = new StringBuilder();
 		this.source = source;
 	}
 	public String next() throws IOException {
