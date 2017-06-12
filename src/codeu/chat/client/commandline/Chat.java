@@ -1,4 +1,3 @@
-
 // Copyright 2017 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -52,7 +51,6 @@ public final class Chat {
   // the system wants to exit, the function will return false.
   //
   public boolean handleCommand(String line) throws IOException {
-
     final List<String> args = new ArrayList<>();
     final Tokenizer tokenizer = new Tokenizer(line);
     for (String token = tokenizer.next(); token != null; token = tokenizer.next()) {
@@ -148,12 +146,7 @@ public final class Chat {
     panel.register("u-add", new Panel.Command() {
       @Override
       public void invoke(List<String> args) {
-        // final String name = args.hasNext() ? args.nextLine().trim() : "";
-        String n = "";
-        for (String token : args) {
-          n = n + token;
-        }
-        final String name = n;
+        final String name = args.size() > 0 ? args.get(0) : "";
         if (name.length() > 0) {
           if (context.create(name) == null) {
             System.out.println("ERROR: Failed to create new user");
@@ -172,11 +165,7 @@ public final class Chat {
     panel.register("u-sign-in", new Panel.Command() {
       @Override
       public void invoke(List<String> args) {
-        String n = "";
-        for (String token : args) {
-          n = n + token;
-        }
-        final String name = n;
+        final String name = args.size() > 0 ? args.get(0) : "";
         if (name.length() > 0) {
           final UserContext user = findUser(name);
           if (user == null) {
@@ -259,11 +248,7 @@ public final class Chat {
     panel.register("c-add", new Panel.Command() {
       @Override
       public void invoke(List<String> args) {
-        String n = "";
-        for (String token : args) {
-          n = n + token;
-        }
-        final String name = n;
+        final String name = args.size() > 0 ? args.get(0) : "";
         if (name.length() > 0) {
           final ConversationContext conversation = user.start(name);
           if (conversation == null) {
@@ -285,11 +270,7 @@ public final class Chat {
     panel.register("c-join", new Panel.Command() {
       @Override
       public void invoke(List<String> args) {
-        String n = "";
-        for (String token : args) {
-          n = n + token;
-        }
-        final String name = n;
+        final String name = args.size() > 0 ? args.get(0) : "";
         if (name.length() > 0) {
           final ConversationContext conversation = find(name);
           if (conversation == null) {
@@ -389,11 +370,8 @@ public final class Chat {
     //
     panel.register("m-add", new Panel.Command() {
       @Override
-      public void invoke(List<String> args) {String n = "";
-        for (String token : args) {
-          n = n + token;
-        }
-        final String message = n;
+      public void invoke(List<String> args) {
+        final String message = args.size() > 0 ? args.get(0) : "";
         if (message.length() > 0) {
           conversation.add(message);
         } else {
