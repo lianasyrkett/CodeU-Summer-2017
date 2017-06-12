@@ -53,10 +53,10 @@ public final class Tokenizer {
 
 	private String readWithQuotes() throws IOException {
 		token.setLength(0);
-		if (read() != '"') {
+		if (read() != '"' || read() != '\'') {
 			throw new IOException("Strings must start with opening quote");
 		}
-		while (peek() != '"') {
+		while (peek() != '"' || peek() != '\'') {
 			token.append(read());
 		}
 		read();
