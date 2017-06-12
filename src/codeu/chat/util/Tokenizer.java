@@ -1,5 +1,7 @@
 package codeu.chat.util;
+
 import java.io.IOException;
+import java.lang.StringBuilder;
 
 public final class Tokenizer {
 	private StringBuilder token;
@@ -9,6 +11,7 @@ public final class Tokenizer {
 	public Tokenizer(String source) {
 		token = new StringBuilder();
 		this.source = source;
+		at = 0;
 	}
 	public String next() throws IOException {
 		while (remaining() > 0 && Character.isWhitespace(peek())) {
@@ -16,11 +19,10 @@ public final class Tokenizer {
 		} if (remaining() <= 0) {
 			return null;
 		} else if (peek() == '"') {
-			readWithQuotes();
+			return readWithQuotes();
 		} else {
-			readWithNoQuotes();
+			return readWithNoQuotes();
 		}
-		return "";
 	}
 
 	private int remaining() {
