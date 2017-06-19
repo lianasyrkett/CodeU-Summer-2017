@@ -16,9 +16,10 @@ public final class Tokenizer {
 	public String next() throws IOException {
 		while (remaining() > 0 && Character.isWhitespace(peek())) {
 			read();
-		} if (remaining() <= 0) {
+		}
+		if (remaining() <= 0) {
 			return null;
-		} else if (peek() == '"') {
+		} else if (peek() == '"' || peek() == '\'') {
 			return readWithQuotes();
 		} else {
 			return readWithNoQuotes();
