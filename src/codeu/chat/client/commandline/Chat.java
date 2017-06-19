@@ -127,7 +127,7 @@ public final class Chat {
 
     panel.register("info", new Panel.Command() {
       @Override
-      public void invoke(Scanner args) {
+      public void invoke(List<String> args) {
         final ServerInfo info = context.getInfo();
         if (info == null) {
           System.out.println("ERROR: Failed to send a valid info object");
