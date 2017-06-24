@@ -25,6 +25,8 @@ import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.store.Store;
 import codeu.chat.util.store.StoreAccessor;
+import codeu.chat.common.UserInterests;
+import java.util.HashSet;
 
 public final class Model {
 
@@ -66,6 +68,27 @@ public final class Model {
   private final Store<Uuid, Message> messageById = new Store<>(UUID_COMPARE);
   private final Store<Time, Message> messageByTime = new Store<>(TIME_COMPARE);
   private final Store<String, Message> messageByText = new Store<>(STRING_COMPARE);
+
+  private final Store<User, HashSet<Uuid>> userInterestByUser = new Store<>(null);
+  private final Store<User, HashSet<Uuid>> convoInterestByUser = new Store<>(null);
+
+  public void addUserInterest(User user, User interested, UserInterests userInterests) {
+    userInterests.interestedInUsers.add(interested.id);
+    userInterestByUser.insert(user, userInterests.interestedInUsers);
+  }
+
+  public void addConversationInterest(User user, ConversationHeader interested, UserInterests userInterests) {
+    userInterests.interestedInConvos.add(interested.id);
+    convoInterestByUser.insert(user, userInterests.interestedInConvos);
+  }
+
+  public StoreAccessor<User, HashSet<Uuid>> userInterestByUser() {
+    return userInterestByUser;
+  }
+
+  public StoreAccessor<User, HashSet<Uuid>> convoInterestByUser() {
+    return convoInterestByUser;
+  }
 
   public void add(User user) {
     userById.insert(user.id, user);
