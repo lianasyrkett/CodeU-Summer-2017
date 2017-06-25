@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 package codeu.chat.server;
 
 import java.io.IOException;
@@ -39,6 +38,10 @@ import codeu.chat.util.Time;
 import codeu.chat.util.Timeline;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.Connection;
+import codeu.chat.server.Model;
+import codeu.chat.server.Snapshotter;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
 
 public final class Server {
 
@@ -57,19 +60,27 @@ public final class Server {
   private final Uuid id;
   private final Secret secret;
 
-  private final Model model = new Model();
-  private final View view = new View(model);
   private final Controller controller;
 
   private final Relay relay;
   private Uuid lastSeen = Uuid.NULL;
 
+  private String filepath = null;
+  private final Model model;
+  final View view;
+
   public Server(final Uuid id, final Secret secret, final Relay relay) {
 
     this.id = id;
     this.secret = secret;
-    this.controller = new Controller(id, model);
+    
     this.relay = relay;
+    this.model = new Model();
+    this.controller = new Controller(id, model);
+    view = new View(model);
+    Snapshotter snap = new Snapshotter(model);
+    Thread thread = new Thread(snap);
+    thread.start();
 
     // New Message - A client wants to add a new message to the back end.
     this.commands.put(NetworkCode.NEW_MESSAGE_REQUEST, new Command() {
@@ -195,6 +206,142 @@ public final class Server {
     });
   }
 
+  public Server(final Uuid id, final Secret secret, final Relay relay, final String fp) {
+
+    this.id = id;
+    this.secret = secret;
+    this.relay = relay;
+    this.model = deserialize(fp); // add whatever has the serialized data in the params
+    view = new View(model);
+
+    this.controller = new Controller(id, model);
+    Snapshotter snap = new Snapshotter(model);
+    Thread thread = new Thread(snap);
+    thread.start();
+
+    // New Message - A client wants to add a new message to the back end.
+    this.commands.put(NetworkCode.NEW_MESSAGE_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+
+        final Uuid author = Uuid.SERIALIZER.read(in);
+        final Uuid conversation = Uuid.SERIALIZER.read(in);
+        final String content = Serializers.STRING.read(in);
+
+        final Message message = controller.newMessage(author, conversation, content);
+
+        Serializers.INTEGER.write(out, NetworkCode.NEW_MESSAGE_RESPONSE);
+        Serializers.nullable(Message.SERIALIZER).write(out, message);
+
+        timeline.scheduleNow(createSendToRelayEvent(
+            author,
+            conversation,
+            message.id));
+      }
+    });
+
+    // New User - A client wants to add a new user to the back end.
+    this.commands.put(NetworkCode.NEW_USER_REQUEST,  new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+
+        final String name = Serializers.STRING.read(in);
+        final User user = controller.newUser(name);
+
+        Serializers.INTEGER.write(out, NetworkCode.NEW_USER_RESPONSE);
+        Serializers.nullable(User.SERIALIZER).write(out, user);
+      }
+    });
+
+    // New Conversation - A client wants to add a new conversation to the back end.
+    this.commands.put(NetworkCode.NEW_CONVERSATION_REQUEST,  new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+
+        final String title = Serializers.STRING.read(in);
+        final Uuid owner = Uuid.SERIALIZER.read(in);
+        final ConversationHeader conversation = controller.newConversation(title, owner);
+
+        Serializers.INTEGER.write(out, NetworkCode.NEW_CONVERSATION_RESPONSE);
+        Serializers.nullable(ConversationHeader.SERIALIZER).write(out, conversation);
+      }
+    });
+
+    // Get Users - A client wants to get all the users from the back end.
+    this.commands.put(NetworkCode.GET_USERS_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+
+        final Collection<User> users = view.getUsers();
+
+        Serializers.INTEGER.write(out, NetworkCode.GET_USERS_RESPONSE);
+        Serializers.collection(User.SERIALIZER).write(out, users);
+      }
+    });
+
+    // Get Conversations - A client wants to get all the conversations from the back end.
+    this.commands.put(NetworkCode.GET_ALL_CONVERSATIONS_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+
+        final Collection<ConversationHeader> conversations = view.getConversations();
+
+        Serializers.INTEGER.write(out, NetworkCode.GET_ALL_CONVERSATIONS_RESPONSE);
+        Serializers.collection(ConversationHeader.SERIALIZER).write(out, conversations);
+      }
+    });
+
+    // Get Conversations By Id - A client wants to get a subset of the converations from
+    //                           the back end. Normally this will be done after calling
+    //                           Get Conversations to get all the headers and now the client
+    //                           wants to get a subset of the payloads.
+    this.commands.put(NetworkCode.GET_CONVERSATIONS_BY_ID_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+
+        final Collection<Uuid> ids = Serializers.collection(Uuid.SERIALIZER).read(in);
+        final Collection<ConversationPayload> conversations = view.getConversationPayloads(ids);
+
+        Serializers.INTEGER.write(out, NetworkCode.GET_CONVERSATIONS_BY_ID_RESPONSE);
+        Serializers.collection(ConversationPayload.SERIALIZER).write(out, conversations);
+      }
+    });
+
+    // Get Messages By Id - A client wants to get a subset of the messages from the back end.
+    this.commands.put(NetworkCode.GET_MESSAGES_BY_ID_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+
+        final Collection<Uuid> ids = Serializers.collection(Uuid.SERIALIZER).read(in);
+        final Collection<Message> messages = view.getMessages(ids);
+
+        Serializers.INTEGER.write(out, NetworkCode.GET_MESSAGES_BY_ID_RESPONSE);
+        Serializers.collection(Message.SERIALIZER).write(out, messages);
+      }
+    });
+
+    this.timeline.scheduleNow(new Runnable() {
+      @Override
+      public void run() {
+        try {
+
+          LOG.info("Reading update from relay...");
+
+          for (final Relay.Bundle bundle : relay.read(id, secret, lastSeen, 32)) {
+            onBundle(bundle);
+            lastSeen = bundle.id();
+          }
+
+        } catch (Exception ex) {
+
+          LOG.error(ex, "Failed to read update from relay.");
+
+        }
+
+        timeline.scheduleIn(RELAY_REFRESH_MS, this);
+      }
+    });
+  }
   public void handleConnection(final Connection connection) {
     timeline.scheduleNow(new Runnable() {
       @Override
@@ -282,5 +429,25 @@ public final class Server {
                     relay.pack(message.id, message.content, message.creation));
       }
     };
+  }
+
+  public Model deserialize(String filepath){
+    try {
+      FileInputStream fs = new FileInputStream(filepath); // what else do I add here
+      ObjectInputStream os = new ObjectInputStream(fs);
+
+      // saving the objects that are serialized
+      // Is there only one object (the data) that needs to be serialized?
+      Object one = os.readObject();
+
+      // Cast the object back to Model
+      Model data = (Model) one;
+      return data;
+    } catch (IOException i) {
+      i.printStackTrace();
+    } catch (ClassNotFoundException c) {
+      c.printStackTrace();
+    }
+    return null;
   }
 }
