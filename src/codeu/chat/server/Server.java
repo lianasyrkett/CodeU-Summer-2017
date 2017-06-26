@@ -65,8 +65,6 @@ public final class Server {
 
   private final Relay relay;
   private Uuid lastSeen = Uuid.NULL;
-
-  private String filepath = null;
   private final Model model;
   final View view;
 
