@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
 package codeu.chat.server;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -39,10 +39,7 @@ import codeu.chat.util.Time;
 import codeu.chat.util.Timeline;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.Connection;
-import codeu.chat.server.Model;
-import codeu.chat.server.Snapshotter;
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
+import codeu.chat.common.ServerInfo;
 
 public final class Server {
 
@@ -61,32 +58,21 @@ public final class Server {
   private final Uuid id;
   private final Secret secret;
 
+  private final Model model = new Model();
+  private final View view = new View(model);
   private final Controller controller;
 
   private final Relay relay;
   private Uuid lastSeen = Uuid.NULL;
 
-  private final Model model;
-  final View view;
+  private static final ServerInfo info = new ServerInfo();
 
-  public Server(final Uuid id, final Secret secret, final Relay relay, final File dir) {
+  public Server(final Uuid id, final Secret secret, final Relay relay) {
 
     this.id = id;
     this.secret = secret;
-    this.relay = relay;
-    File fp = new File(dir, "chatLog.dat");
-    if (fp == null) {
-      this.model = new Model();
-    } else {
-      this.model = deserialize(fp); // add whatever has the serialized data in the params
-    }
-    
-    view = new View(model);
-
     this.controller = new Controller(id, model);
-    Snapshotter snap = new Snapshotter(model);
-    Thread thread = new Thread(snap);
-    thread.start();
+    this.relay = relay;
 
     // New Message - A client wants to add a new message to the back end.
     this.commands.put(NetworkCode.NEW_MESSAGE_REQUEST, new Command() {
@@ -189,6 +175,14 @@ public final class Server {
       }
     });
 
+    this.commands.put(NetworkCode.SERVER_INFO_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        Serializers.INTEGER.write(out, NetworkCode.SERVER_INFO_RESPONSE);
+        Uuid.SERIALIZER.write(out, info.version);
+  }
+});
+
     this.timeline.scheduleNow(new Runnable() {
       @Override
       public void run() {
@@ -211,6 +205,7 @@ public final class Server {
       }
     });
   }
+
   public void handleConnection(final Connection connection) {
     timeline.scheduleNow(new Runnable() {
       @Override
@@ -299,23 +294,4 @@ public final class Server {
       }
     };
   }
-
-  public Model deserialize(File filepath){
-    try {
-      FileInputStream fs = new FileInputStream(filepath); // what else do I add here
-      ObjectInputStream os = new ObjectInputStream(fs);
-
-      // saving the objects that are serialized
-      // Is there only one object (the data) that needs to be serialized?
-      Object one = os.readObject();
-
-      // Cast the object back to Model
-      Model data = (Model) one;
-      return data;
-    } catch (IOException i) {
-      i.printStackTrace();
-    } catch (ClassNotFoundException c) {
-      c.printStackTrace();
-    }
-    return null;
-  }
+}
