@@ -65,14 +65,16 @@ public final class Server {
 
   private final Relay relay;
   private Uuid lastSeen = Uuid.NULL;
+
   private final Model model;
   final View view;
 
-  public Server(final Uuid id, final Secret secret, final Relay relay, final File fp) {
+  public Server(final Uuid id, final Secret secret, final Relay relay, final File dir) {
 
     this.id = id;
     this.secret = secret;
     this.relay = relay;
+    File fp = new File(dir, "chatLog.dat");
     if (fp == null) {
       this.model = new Model();
     } else {
@@ -317,4 +319,3 @@ public final class Server {
     }
     return null;
   }
-}
