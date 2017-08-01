@@ -44,7 +44,8 @@ import codeu.chat.server.Snapshotter;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 
-public final class Server {
+import java.io.Serializable;
+public final class Server implements Serializable {
 
   private interface Command {
     void onMessage(InputStream in, OutputStream out) throws IOException;
@@ -66,16 +67,16 @@ public final class Server {
   private final Relay relay;
   private Uuid lastSeen = Uuid.NULL;
 
+  private String filepath = null;
   private final Model model;
   final View view;
 
-  public Server(final Uuid id, final Secret secret, final Relay relay, final File dir) {
+  public Server(final Uuid id, final Secret secret, final Relay relay, final File fp) {
 
     this.id = id;
     this.secret = secret;
     this.relay = relay;
-    File fp = new File(dir, "chatLog.dat");
-    if (fp == null) {
+    if (fp == null || !fp.exists()) {
       this.model = new Model();
     } else {
       this.model = deserialize(fp); // add whatever has the serialized data in the params
@@ -84,7 +85,7 @@ public final class Server {
     view = new View(model);
 
     this.controller = new Controller(id, model);
-    Snapshotter snap = new Snapshotter(model);
+    Snapshotter snap = new Snapshotter(model, fp);
     Thread thread = new Thread(snap);
     thread.start();
 
@@ -138,8 +139,7 @@ public final class Server {
 
     // Get Users - A client wants to get all the users from the back end.
     this.commands.put(NetworkCode.GET_USERS_REQUEST, new Command() {
-      @Override
-      public void onMessage(InputStream in, OutputStream out) throws IOException {
+      @Override     public void onMessage(InputStream in, OutputStream out) throws IOException {
 
         final Collection<User> users = view.getUsers();
 
@@ -296,8 +296,8 @@ public final class Server {
                     relay.pack(user.id, user.name, user.creation),
                     relay.pack(conversation.id, conversation.title, conversation.creation),
                     relay.pack(message.id, message.content, message.creation));
-      }
     };
+      }
   }
 
   public Model deserialize(File filepath){
@@ -319,3 +319,4 @@ public final class Server {
     }
     return null;
   }
+}
