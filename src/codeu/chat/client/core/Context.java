@@ -22,6 +22,7 @@ import codeu.chat.common.BasicView;
 import codeu.chat.common.User;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.ConnectionSource;
+import codeu.chat.common.UserInterest;
 
 public final class Context {
 
@@ -38,6 +39,10 @@ public final class Context {
     return user == null ?
         null :
         new UserContext(user, view, controller);
+  }
+
+  public void add(String name) {
+    final UserInterest userInterest = controller.newUserInterest(name);
   }
 
   public Iterable<UserContext> allUsers() {

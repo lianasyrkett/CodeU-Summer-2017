@@ -105,6 +105,8 @@ public final class Chat {
         System.out.println("    List all users.");
         System.out.println("  u-add <name>");
         System.out.println("    Add a new user with the given name.");
+        System.out.println("  ui-add <name>");
+        System.out.println("    Add a new user interest with the given name.");
         System.out.println("  u-sign-in <name>");
         System.out.println("    Sign in as the user with the given name.");
         System.out.println("  exit");
@@ -141,6 +143,20 @@ public final class Chat {
         if (name.length() > 0) {
           if (context.create(name) == null) {
             System.out.println("ERROR: Failed to create new user");
+          }
+        } else {
+          System.out.println("ERROR: Missing <username>");
+        }
+      }
+    });
+
+    panel.register("ui-add", new Panel.Command() {
+      @Override
+      public void invoke(Scanner args) {
+        final String name = args.hasNext() ? args.nextLine().trim() : "";
+        if (name.length() > 0) {
+          if (context.add(name) == null) {
+            System.out.println("ERROR: Failed to create new user interest");
           }
         } else {
           System.out.println("ERROR: Missing <username>");
@@ -203,6 +219,8 @@ public final class Chat {
         System.out.println("    List all conversations that the current user can interact with.");
         System.out.println("  c-add <title>");
         System.out.println("    Add a new conversation with the given title and join it as the current user.");
+        System.out.println("  ci-add <title>");
+        System.out.println("    Add a new conversation interest with the given title and join it as the current user.");
         System.out.println("  c-join <title>");
         System.out.println("    Join the conversation as the current user.");
         System.out.println("  info");
@@ -249,6 +267,20 @@ public final class Chat {
           }
         } else {
           System.out.println("ERROR: Missing <title>");
+        }
+      }
+    });
+
+    panel.register("ci-add", new Panel.Command() {
+      @Override
+      public void invoke(Scanner args) {
+        final String name = args.hasNext() ? args.nextLine().trim() : "";
+        if (name.length() > 0) {
+          if (user.start(name) == null) {
+            System.out.println("ERROR: Failed to create new cpnversation interest");
+          }
+        } else {
+          System.out.println("ERROR: Missing <username>");
         }
       }
     });
