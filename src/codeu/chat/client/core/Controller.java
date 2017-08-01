@@ -28,7 +28,7 @@ import codeu.chat.util.Serializers;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.Connection;
 import codeu.chat.util.connections.ConnectionSource;
-import codeu.chat.common.UserInterests;
+import codeu.chat.common.UserInterest;
 
 final class Controller implements BasicController {
 
@@ -114,19 +114,19 @@ final class Controller implements BasicController {
     return response;
   }
 
-  public User newUserInterest(String name) {
+  public UserInterest newUserInterest(String name) {
 
-    User response = null;
+    UserInterest response = null;
 
     try (final Connection connection = source.connect()) {
 
-      Serializers.INTEGER.write(connection.out(), NetworkCode.NEW_USER_REQUEST);
+      Serializers.INTEGER.write(connection.out(), NetworkCode.NEW_USERINTEREST_REQUEST);
       Serializers.STRING.write(connection.out(), name);
-      LOG.info("newUser: Request completed.");
+      LOG.info("newUserInterest: Request completed.");
 
-      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.NEW_USER_RESPONSE) {
-        response = Serializers.nullable(User.SERIALIZER).read(connection.in());
-        LOG.info("newUser: Response completed.");
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.NEW_USERINTEREST_RESPONSE) {
+        response = Serializers.nullable(UserInterest.SERIALIZER).read(connection.in());
+        LOG.info("newUserInterest: Response completed.");
       } else {
         LOG.error("Response from server failed.");
       }

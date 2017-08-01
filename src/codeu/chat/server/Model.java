@@ -25,7 +25,7 @@ import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.store.Store;
 import codeu.chat.util.store.StoreAccessor;
-import codeu.chat.common.UserInterests;
+import codeu.chat.common.UserInterest;
 import java.util.HashSet;
 
 public final class Model {
@@ -69,27 +69,27 @@ public final class Model {
   private final Store<Time, Message> messageByTime = new Store<>(TIME_COMPARE);
   private final Store<String, Message> messageByText = new Store<>(STRING_COMPARE);
 
-  private final Store<Uuid, UserInterests> userInterestByUser = new Store<>(null);
+  private final Store<Uuid, UserInterest> userInterestByUser = new Store<>(null);
 
   public void addUserInterest(User user, User interested) {
-    UserInterests userInterest = userInterestByUser.first(user.id);
+    UserInterest userInterest = userInterestByUser.first(user.id);
     if(userInterest == null) {
-      userInterest = new UserInterests(userInterest.interestedInUsers, userInterest. interestedInConvos);
+      userInterest = new UserInterest(userInterest.interestedInUsers, userInterest. interestedInConvos);
       userInterestByUser.insert(user.id, userInterest);
     }
     userInterest.interestedInUsers.add(interested.id);
   }
 
   public void addConversationInterest(User user, ConversationHeader interested) {
-    UserInterests userInterest = userInterestByUser.first(user.id);
+    UserInterest userInterest = userInterestByUser.first(user.id);
     if(userInterest == null) {
-      userInterest = new UserInterests(userInterest.interestedInUsers, userInterest.interestedInConvos);
+      userInterest = new UserInterest(userInterest.interestedInUsers, userInterest.interestedInConvos);
       userInterestByUser.insert(user.id, userInterest);
     }
     userInterest.interestedInConvos.add(interested.id);
   }
 
-  public StoreAccessor<Uuid, UserInterests> userInterestByUser() {
+  public StoreAccessor<Uuid, UserInterest> userInterestByUser() {
     return userInterestByUser;
   }
 
