@@ -1,3 +1,4 @@
+
 // Copyright 2017 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +15,7 @@
 
 package codeu.chat.client.commandline;
 
+import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -27,7 +29,7 @@ import java.util.Scanner;
 final class Panel {
 
   public interface Command {
-    void invoke(Scanner line);
+    void invoke(List<String> args);
   }
 
   private final Map<String, Command> commands = new HashMap<>();
@@ -48,11 +50,12 @@ final class Panel {
   // will be returned. True will be return if a command is found. Whether or not
   // the command was successful is not returned.
   //
-  public boolean handleCommand(String commandName, Scanner line) {
+  public boolean handleCommand(String commandName, List<String> args) {
     final Command command = commands.get(commandName);
     if (command != null) {
-      command.invoke(line);
+      command.invoke(args);
     }
     return command != null;
   }
+
 }
