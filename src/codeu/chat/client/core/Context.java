@@ -22,18 +22,7 @@ import codeu.chat.common.BasicView;
 import codeu.chat.common.User;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.ConnectionSource;
-<<<<<<< HEAD
-<<<<<<< HEAD
 import codeu.chat.common.ServerInfo;
-import codeu.chat.common.UserInterest;
-=======
-import codeu.chat.common.UserInterest;
-import codeu.chat.common.ServerInfo;
->>>>>>> cb88073c36b8550309ef1d8ce07ed6ed2c9c8d5d
-=======
-import codeu.chat.common.ServerInfo;
-import codeu.chat.common.UserInterest;
->>>>>>> 0c650dca6633712c62b83e58eb497584a77ec537
 
 public final class Context {
 
