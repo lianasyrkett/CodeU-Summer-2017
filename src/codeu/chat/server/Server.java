@@ -44,8 +44,7 @@ import codeu.chat.server.Snapshotter;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 
-import java.io.Serializable;
-public final class Server implements Serializable {
+public final class Server {
 
   private interface Command {
     void onMessage(InputStream in, OutputStream out) throws IOException;
