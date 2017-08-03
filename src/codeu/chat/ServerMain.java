@@ -94,8 +94,9 @@ final class ServerMain {
     final Relay relay = relaySource == null ?
                         new NoOpRelay() :
                         new RemoteRelay(relaySource);
-
-    final Server server = new Server(id, secret, relay, persistentPath);
+    
+    File fp = new File(persistantPath, 'path.txt');
+    final Server server = new Server(id, secret, relay, fp);
 
     LOG.info("Created server.");
 
