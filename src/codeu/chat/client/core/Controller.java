@@ -28,8 +28,11 @@ import codeu.chat.util.Serializers;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.Connection;
 import codeu.chat.util.connections.ConnectionSource;
+import java.util.ArrayList;
 
 final class Controller implements BasicController {
+
+  public final ArrayList<Uuid> members = new ArrayList<>();
 
   private final static Logger.Log LOG = Logger.newLog(Controller.class);
 
@@ -39,6 +42,13 @@ final class Controller implements BasicController {
     this.source = source;
   }
 
+  public void addMemberToConvo(Uuid conversationID, Uuid owner, Uuid member) {
+    // look up conversation header based off ID
+    // if owner of convo == owner given
+    // add the member
+    members.add(member);
+
+  }
   @Override
   public Message newMessage(Uuid author, Uuid conversation, String body) {
 
@@ -91,6 +101,7 @@ final class Controller implements BasicController {
 
   @Override
   public ConversationHeader newConversation(String title, Uuid owner)  {
+
 
     ConversationHeader response = null;
 
