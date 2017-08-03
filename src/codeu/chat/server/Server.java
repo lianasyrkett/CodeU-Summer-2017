@@ -280,7 +280,7 @@ public final class Server {
                                       relayMessage.time());
     }
   }
-
+}
   private Runnable createSendToRelayEvent(final Uuid userId,
                                           final Uuid conversationId,
                                           final Uuid messageId) {
