@@ -177,8 +177,8 @@ public final class Chat {
 
     panel.register("ui-add", new Panel.Command() {
       @Override
-      public void invoke(Scanner args) {
-        final String name = args.hasNext() ? args.nextLine().trim() : "";
+      public void invoke(List<String> args) {
+        final String name = args.size() > 0 ? args.get(0) : "";
         if (name.length() > 0) {
           if (context.add(name) == null) {
             System.out.println("ERROR: Failed to create new user interest");
@@ -298,10 +298,10 @@ public final class Chat {
 
     panel.register("ci-add", new Panel.Command() {
       @Override
-      public void invoke(Scanner args) {
-        final String name = args.hasNext() ? args.nextLine().trim() : "";
+      public void invoke(List<String> args) {
+        final String name = args.size() > 0 ? args.get(0) : "";
         if (name.length() > 0) {
-          if (user.start(name) == null) {
+          if (user.begin(name) == null) {
             System.out.println("ERROR: Failed to create new cpnversation interest");
           }
         } else {

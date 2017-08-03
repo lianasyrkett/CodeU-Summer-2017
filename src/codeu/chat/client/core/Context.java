@@ -46,8 +46,8 @@ public final class Context {
         new UserContext(user, view, controller);
   }
 
-  public void add(String name) {
-    final UserInterest userInterest = controller.newUserInterest(name);
+  public UserInterest add(String name) {
+    return controller.newUserInterest(name);
   }
 
   public Iterable<UserContext> allUsers() {
