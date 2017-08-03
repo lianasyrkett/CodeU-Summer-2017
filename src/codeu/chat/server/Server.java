@@ -210,6 +210,7 @@ public final class Server {
       }
     });
   }
+
   public void handleConnection(final Connection connection) {
     timeline.scheduleNow(new Runnable() {
       @Override
@@ -280,7 +281,7 @@ public final class Server {
                                       relayMessage.time());
     }
   }
-}
+
   private Runnable createSendToRelayEvent(final Uuid userId,
                                           final Uuid conversationId,
                                           final Uuid messageId) {
@@ -296,7 +297,7 @@ public final class Server {
                     relay.pack(conversation.id, conversation.title, conversation.creation),
                     relay.pack(message.id, message.content, message.creation));
     };
-      }
+      };
   }
 
   public Model deserialize(File filepath){
