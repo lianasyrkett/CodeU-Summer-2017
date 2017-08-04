@@ -42,8 +42,10 @@ public final class Controller implements RawController, BasicController {
   }
 
   public void addMemberToConversation(Uuid conversationID, Uuid owner, Uuid member) {
-    ConversationHeader.members.add(member);
+    ConversationHeader convo = model.conversationById().first(conversationID);
+    convo.members.add(member);
   }
+
   @Override
   public Message newMessage(Uuid author, Uuid conversation, String body) {
     return newMessage(createId(), author, conversation, body, Time.now());
