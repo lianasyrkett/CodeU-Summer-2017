@@ -12,6 +12,26 @@ import java.util.HashSet;
 
 public class UserInterest {
 
+  public static final Serializer<UserInterest> SERIALIZER = new Serializer<UserInterest>() {
+
+    @Override
+    public void write(OutputStream out, UserInterest value) throws IOException {
+
+      Serializers.HashSet.write(out, value.interestedInUsers);
+      Serializers.HashSet.write(out, value.interestedInConvos);
+    }
+
+    @Override
+    public UserInterest read(InputStream in) throws IOException {
+
+      return new User(
+          Serializers.HashSet.read(in),
+          Serializers.HashSet.read(in)
+      );
+
+    }
+  };
+
   public HashSet<Uuid> interestedInUsers = new HashSet<>();
   public HashSet<Uuid> interestedInConvos = new HashSet<>();
 
