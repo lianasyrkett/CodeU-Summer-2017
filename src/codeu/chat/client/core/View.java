@@ -29,6 +29,7 @@ import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.Connection;
 import codeu.chat.util.connections.ConnectionSource;
+import codeu.chat.common.ServerInfo;
 
 // VIEW
 //
@@ -44,6 +45,23 @@ final class View implements BasicView {
   public View(ConnectionSource source) {
     this.source = source;
   }
+
+  public ServerInfo getInfo() {
+    try (final Connection connection = this.source.connect()) {
+      Serializers.INTEGER.write(connection.out(), NetworkCode.SERVER_INFO_REQUEST);
+        if (Serializers.INTEGER.read(connection.in()) == NetworkCode.SERVER_INFO_RESPONSE) {
+          final Uuid version = Uuid.SERIALIZER.read(connection.in());
+          return new ServerInfo(version);
+        } else {
+            LOG.error("Response from server failed.");
+      }
+    } catch (Exception ex) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(ex, "Exception during call on server.");
+    }
+
+  return null;
+}
 
   @Override
   public Collection<User> getUsers() {

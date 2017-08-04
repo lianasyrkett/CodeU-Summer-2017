@@ -43,6 +43,7 @@ import codeu.chat.server.Model;
 import codeu.chat.server.Snapshotter;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
+import codeu.chat.common.ServerInfo;
 
 public final class Server {
 
@@ -65,12 +66,12 @@ public final class Server {
 
   private final Relay relay;
   private Uuid lastSeen = Uuid.NULL;
-
   private String filepath = null;
   private final Model model;
   final View view;
 
   public Server(final Uuid id, final Secret secret, final Relay relay, final File fp) {
+
 
     this.id = id;
     this.secret = secret;
@@ -187,6 +188,14 @@ public final class Server {
         Serializers.collection(Message.SERIALIZER).write(out, messages);
       }
     });
+
+    this.commands.put(NetworkCode.SERVER_INFO_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        Serializers.INTEGER.write(out, NetworkCode.SERVER_INFO_RESPONSE);
+        Uuid.SERIALIZER.write(out, info.version);
+  }
+});
 
     this.timeline.scheduleNow(new Runnable() {
       @Override
