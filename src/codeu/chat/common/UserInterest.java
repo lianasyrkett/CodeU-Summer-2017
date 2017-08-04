@@ -9,6 +9,7 @@ import codeu.chat.util.Serializers;
 import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
 import java.util.HashSet;
+import java.util.Collection;
 
 public class UserInterest {
 
@@ -16,19 +17,18 @@ public class UserInterest {
 
     @Override
     public void write(OutputStream out, UserInterest value) throws IOException {
-
-      Serializers.HashSet.write(out, value.interestedInUsers);
-      Serializers.HashSet.write(out, value.interestedInConvos);
+      Serializer<Collection<Uuid>> serializer = Serializers.collection(Uuid.SERIALIZER);
+      serializer.write(out, value.interestedInUsers);
+      serializer.write(out, value.interestedInConvos);
     }
 
     @Override
     public UserInterest read(InputStream in) throws IOException {
-
-      return new User(
-          Serializers.HashSet.read(in),
-          Serializers.HashSet.read(in)
+      Serializer<Collection<Uuid>> serializer = Serializers.collection(Uuid.SERIALIZER);
+      return new UserInterest(
+        new HashSet<Uuid>(serializer.read(in)),
+        new HashSet<Uuid>(serializer.read(in))
       );
-
     }
   };
 
