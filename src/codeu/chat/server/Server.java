@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 package codeu.chat.server;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -39,6 +39,10 @@ import codeu.chat.util.Time;
 import codeu.chat.util.Timeline;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.Connection;
+import codeu.chat.server.Model;
+import codeu.chat.server.Snapshotter;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
 import codeu.chat.common.ServerInfo;
 
 public final class Server {
@@ -58,21 +62,32 @@ public final class Server {
   private final Uuid id;
   private final Secret secret;
 
-  private final Model model = new Model();
-  private final View view = new View(model);
   private final Controller controller;
 
   private final Relay relay;
   private Uuid lastSeen = Uuid.NULL;
+  private String filepath = null;
+  private final Model model;
+  final View view;
 
-  private static final ServerInfo info = new ServerInfo();
+  public Server(final Uuid id, final Secret secret, final Relay relay, final File fp) {
 
-  public Server(final Uuid id, final Secret secret, final Relay relay) {
 
     this.id = id;
     this.secret = secret;
-    this.controller = new Controller(id, model);
     this.relay = relay;
+    if (fp == null || !fp.exists()) {
+      this.model = new Model();
+    } else {
+      this.model = deserialize(fp); // add whatever has the serialized data in the params
+    }
+    
+    view = new View(model);
+
+    this.controller = new Controller(id, model);
+    Snapshotter snap = new Snapshotter(model, fp);
+    Thread thread = new Thread(snap);
+    thread.start();
 
     // New Message - A client wants to add a new message to the back end.
     this.commands.put(NetworkCode.NEW_MESSAGE_REQUEST, new Command() {
@@ -124,8 +139,7 @@ public final class Server {
 
     // Get Users - A client wants to get all the users from the back end.
     this.commands.put(NetworkCode.GET_USERS_REQUEST, new Command() {
-      @Override
-      public void onMessage(InputStream in, OutputStream out) throws IOException {
+      @Override     public void onMessage(InputStream in, OutputStream out) throws IOException {
 
         final Collection<User> users = view.getUsers();
 
@@ -291,7 +305,27 @@ public final class Server {
                     relay.pack(user.id, user.name, user.creation),
                     relay.pack(conversation.id, conversation.title, conversation.creation),
                     relay.pack(message.id, message.content, message.creation));
-      }
     };
+      };
+  }
+
+  public Model deserialize(File filepath){
+    try {
+      FileInputStream fs = new FileInputStream(filepath); // what else do I add here
+      ObjectInputStream os = new ObjectInputStream(fs);
+
+      // saving the objects that are serialized
+      // Is there only one object (the data) that needs to be serialized?
+      Object one = os.readObject();
+
+      // Cast the object back to Model
+      Model data = (Model) one;
+      return data;
+    } catch (IOException i) {
+      i.printStackTrace();
+    } catch (ClassNotFoundException c) {
+      c.printStackTrace();
+    }
+    return null;
   }
 }
