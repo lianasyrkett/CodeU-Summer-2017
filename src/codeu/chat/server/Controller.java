@@ -26,6 +26,8 @@ import codeu.chat.common.User;
 import codeu.chat.util.Logger;
 import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
+import codeu.chat.common.ConversationHeader;
+
 
 public final class Controller implements RawController, BasicController {
 
@@ -39,6 +41,9 @@ public final class Controller implements RawController, BasicController {
     this.uuidGenerator = new RandomUuidGenerator(serverId, System.currentTimeMillis());
   }
 
+  public void addMemberToConversation(Uuid conversationID, Uuid owner, Uuid member) {
+    ConversationHeader.members.add(member);
+  }
   @Override
   public Message newMessage(Uuid author, Uuid conversation, String body) {
     return newMessage(createId(), author, conversation, body, Time.now());
