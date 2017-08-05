@@ -22,6 +22,7 @@ import codeu.chat.util.Serializer;
 import codeu.chat.util.Serializers;
 import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
+import java.util.ArrayList;
 
 public final class ConversationHeader {
 
@@ -54,6 +55,7 @@ public final class ConversationHeader {
   public final Uuid owner;
   public final Time creation;
   public final String title;
+  public ArrayList<Uuid> members = new ArrayList<>();
 
   public ConversationHeader(Uuid id, Uuid owner, Time creation, String title) {
 
