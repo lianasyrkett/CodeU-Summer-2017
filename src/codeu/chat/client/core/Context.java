@@ -46,10 +46,6 @@ public final class Context {
         new UserContext(user, view, controller);
   }
 
-  public UserInterest add(String name) {
-    return controller.newUserInterest(name);
-  }
-
   public Iterable<UserContext> allUsers() {
     final Collection<UserContext> users = new ArrayList<>();
     for (final User user : view.getUsers()) {

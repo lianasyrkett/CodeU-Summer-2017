@@ -56,8 +56,8 @@ public final class Controller implements RawController, BasicController {
     return newConversation(createId(), title, owner, Time.now());
   }
 
-  public UserInterest newUserInterest(String name) {
-    return newUserInterest(new HashSet<Uuid>(), new HashSet<Uuid>());
+  public UserInterest newUserInterest(String name, Uuid owner) {
+    return model.addUserInterest(model.userById().first(owner), model.userByText().first(name));
   }
 
   @Override

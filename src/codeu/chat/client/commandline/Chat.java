@@ -118,8 +118,6 @@ public final class Chat {
         System.out.println("    List all users.");
         System.out.println("  u-add <name>");
         System.out.println("    Add a new user with the given name.");
-        System.out.println("  ui-add <name>");
-        System.out.println("    Add a new user interest with the given name.");
         System.out.println("  u-sign-in <name>");
         System.out.println("    Sign in as the user with the given name.");
         System.out.println("  exit");
@@ -175,21 +173,7 @@ public final class Chat {
       }
     });
 
-    panel.register("ui-add", new Panel.Command() {
-      @Override
-      public void invoke(List<String> args) {
-        final String name = args.size() > 0 ? args.get(0) : "";
-        if (name.length() > 0) {
-          if (context.add(name) == null) {
-            System.out.println("ERROR: Failed to create new user interest");
-          }
-        } else {
-          System.out.println("ERROR: Missing <username>");
-        }
-      }
-    });
-
-    // U-SIGN-IN (sign in user)
+      // U-SIGN-IN (sign in user)
     //
     // Add a command to sign-in as a user when the user enters "u-sign-in"
     // while on the root panel.
@@ -244,6 +228,8 @@ public final class Chat {
         System.out.println("    List all conversations that the current user can interact with.");
         System.out.println("  c-add <title>");
         System.out.println("    Add a new conversation with the given title and join it as the current user.");
+        System.out.println("  ui-add <name>");
+        System.out.println("    Add a new user interest with the given name.");
         System.out.println("  ci-add <title>");
         System.out.println("    Add a new conversation interest with the given title and join it as the current user.");
         System.out.println("  c-join <title>");
@@ -296,12 +282,26 @@ public final class Chat {
       }
     });
 
+    panel.register("ui-add", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        final String name = args.size() > 0 ? args.get(0) : "";
+        if (name.length() > 0) {
+          if (user.beginUserInterest(name) == null) {
+            System.out.println("ERROR: Failed to create new user interest");
+          }
+        } else {
+          System.out.println("ERROR: Missing <username>");
+        }
+      }
+    });
+
     panel.register("ci-add", new Panel.Command() {
       @Override
       public void invoke(List<String> args) {
         final String name = args.size() > 0 ? args.get(0) : "";
         if (name.length() > 0) {
-          if (user.begin(name) == null) {
+          if (user.beginUserInterest(name) == null) {
             System.out.println("ERROR: Failed to create new cpnversation interest");
           }
         } else {

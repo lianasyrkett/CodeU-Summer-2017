@@ -114,7 +114,7 @@ final class Controller implements BasicController {
     return response;
   }
 
-  public UserInterest newUserInterest(String name) {
+  public UserInterest newUserInterest(String name, Uuid owner) {
 
     UserInterest response = null;
 
@@ -122,6 +122,7 @@ final class Controller implements BasicController {
 
       Serializers.INTEGER.write(connection.out(), NetworkCode.NEW_USERINTEREST_REQUEST);
       Serializers.STRING.write(connection.out(), name);
+      Uuid.SERIALIZER.write(connection.out(), owner);
       LOG.info("newUserInterest: Request completed.");
 
       if (Serializers.INTEGER.read(connection.in()) == NetworkCode.NEW_USERINTEREST_RESPONSE) {

@@ -43,8 +43,8 @@ public final class UserContext {
         new ConversationContext(user, conversation, view, controller);
   }
 
-  public UserInterest begin(String name) {
-    return controller.newUserInterest(name);
+  public UserInterest beginUserInterest(String name) {
+    return controller.newUserInterest(name, user.id);
   }
 
   public Iterable<ConversationContext> conversations() {

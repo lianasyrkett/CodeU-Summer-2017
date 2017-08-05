@@ -128,7 +128,8 @@ public final class Server {
       public void onMessage(InputStream in, OutputStream out) throws IOException {
 
         final String name = Serializers.STRING.read(in);
-        final UserInterest userInterest = controller.newUserInterest(name);
+        final Uuid owner = Uuid.SERIALIZER.read(in);
+        final UserInterest userInterest = controller.newUserInterest(name, owner);
 
         Serializers.INTEGER.write(out, NetworkCode.NEW_USER_RESPONSE);
         Serializers.nullable(UserInterest.SERIALIZER).write(out, userInterest);
