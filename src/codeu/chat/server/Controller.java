@@ -26,6 +26,8 @@ import codeu.chat.common.User;
 import codeu.chat.util.Logger;
 import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
+import java.util.HashSet;
+import codeu.chat.common.UserInterest;
 
 public final class Controller implements RawController, BasicController {
 
@@ -52,6 +54,10 @@ public final class Controller implements RawController, BasicController {
   @Override
   public ConversationHeader newConversation(String title, Uuid owner) {
     return newConversation(createId(), title, owner, Time.now());
+  }
+
+  public UserInterest newUserInterest(String name, Uuid owner) {
+    return model.addUserInterest(model.userById().first(owner), model.userByText().first(name));
   }
 
   @Override
@@ -141,6 +147,11 @@ public final class Controller implements RawController, BasicController {
     }
 
     return conversation;
+  }
+
+  public UserInterest newUserInterest(HashSet<Uuid> interestedInUsers, HashSet<Uuid> interestedInConvos) {
+
+    return new UserInterest(interestedInUsers, interestedInConvos);
   }
 
   private Uuid createId() {

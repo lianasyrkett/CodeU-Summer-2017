@@ -44,6 +44,7 @@ import codeu.chat.server.Snapshotter;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import codeu.chat.common.ServerInfo;
+import codeu.chat.common.UserInterest;
 
 public final class Server {
 
@@ -134,6 +135,19 @@ public final class Server {
 
         Serializers.INTEGER.write(out, NetworkCode.NEW_CONVERSATION_RESPONSE);
         Serializers.nullable(ConversationHeader.SERIALIZER).write(out, conversation);
+      }
+    });
+
+    this.commands.put(NetworkCode.NEW_USERINTEREST_REQUEST,  new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+
+        final String name = Serializers.STRING.read(in);
+        final Uuid owner = Uuid.SERIALIZER.read(in);
+        final UserInterest userInterest = controller.newUserInterest(name, owner);
+
+        Serializers.INTEGER.write(out, NetworkCode.NEW_USER_RESPONSE);
+        Serializers.nullable(UserInterest.SERIALIZER).write(out, userInterest);
       }
     });
 

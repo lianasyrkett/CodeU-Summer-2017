@@ -71,13 +71,14 @@ public final class Model {
 
   private final Store<Uuid, UserInterest> userInterestByUser = new Store<>(null);
 
-  public void addUserInterest(User user, User interested) {
+  public UserInterest addUserInterest(User user, User interested) {
     UserInterest userInterest = userInterestByUser.first(user.id);
     if(userInterest == null) {
       userInterest = new UserInterest(userInterest.interestedInUsers, userInterest. interestedInConvos);
       userInterestByUser.insert(user.id, userInterest);
     }
     userInterest.interestedInUsers.add(interested.id);
+    return userInterest;
   }
 
   public void addConversationInterest(User user, ConversationHeader interested) {
